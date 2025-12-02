@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EduAI Pro - AI Notes & PDF Solver</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .loading { display: none; }
+        .loading.show { display: block; }
+        .dark { background-color: #1a202c; color: #e2e8f0; }
+        .light { background-color: #f7fafc; color: #2d3748; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+    <!-- Header -->
+    <header class="bg-blue-600 dark:bg-blue-800 text-white p-4 shadow-md">
+        <div class="container mx-auto flex justify-between items-center">
+            <h1 class="text-2xl font-bold">EduAI Pro</h1>
+            <nav class="flex space-x-4">
+                <button onclick="showSection('home')" class="hover:underline">Home</button>
+                <button onclick="showSection('notes')" class="hover:underline">Notes</button>
+                <button onclick="showSection('pdf')" class="hover:underline">PDF Solver</button>
+                <button onclick="showSection('contact')" class="hover:underline">Contact</button>
+            </nav>
+            <button id="theme-toggle" class="ml-4 p-2 bg-gray-200 dark:bg-gray-700 rounded" onclick="toggleTheme()">🌙</button>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow container mx-auto p-4">
+        <!-- Home Section -->
+        <section id="home" class="section">
+            <div class="text-center py-10">
+                <h2 class="text-4xl font-bold mb-6">Welcome to EduAI Pro</h2>
+                <p class="text-lg mb-8">Generate AI-powered notes or solve PDFs instantly.</p>
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+                        <h3 class="text-2xl font-semibold mb-4">AI Notes Generator</h3>
+                        <p>Create custom notes, summaries, and MCQs.</p>
+                        <button onclick="showSection('notes')" class="mt-4 bg-blue-600 text-white px-4 py-2 rounded">Get Started</button>
+                    </div>
+                    <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+                        <h3 class="text-2xl font-semibold mb-4">PDF Solver / Summarizer</h3>
+                        <p>Upload a PDF and get summaries, points, and answers.</p>
+                        <button onclick="showSection('pdf')" class="mt-4 bg-blue-600 text-white px-4 py-2 rounded">Upload PDF</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- AI Notes Generator Section -->
+        <section id="notes" class="section hidden">
+            <h2 class="text-3xl font-bold mb-6">AI Notes Generator</h2>
+            <form id="notes-form" class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+                <div class="grid md:grid-cols-2 gap-4 mb-4">
+                    <input type="text" id="subject" placeholder="Subject" class="p-2 border rounded dark:bg-gray-700" required>
+                    <input type="text" id="chapter" placeholder="Chapter Name" class="p-2 border rounded dark:bg-gray-700" required>
+                </div>
+                <input type="text" id="topic" placeholder="Topic" class="p-2 border rounded mb-4 w-full dark:bg-gray-700" required>
+                <select id="note-type" class="p-2 border rounded mb-4 w-full dark:bg-gray-700">
+                    <option>Short Notes</option>
+                    <option>Long Answers</option>
+                    <option>MCQs with answers</option>
+                    <option>Summary</option>
+                    <option>Definitions</option>
+                </select>
+                <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded">Generate Notes</button>
+            </form>
+            <div id="notes-output" class="mt-6 hidden">
+                <div id="notes-content" class="bg-gray-100 dark:bg-gray-700 p-4 rounded"></div>
+                <button onclick="downloadPDF('notes-content')" class="mt-4 bg-green-600 text-white px-4 py-2 rounded">Download as PDF</button>
+                <button onclick="showPaymentModal()" class="mt-4 bg-yellow-600 text-white px-4 py-2 rounded">Unlock Full PDF ₹29</button>
+            </div>
+            <div id="loading-notes" class="loading mt-4"><div class="spinner border-4 border-blue-600 border-t-transparent rounded-full w-8 h-8 animate-spin mx-auto"></div></div>
+        </section>
+
+        <!-- PDF Solver Section -->
+        <section id="pdf" class="section hidden">
+            <h2 class="text-3xl font-bold mb-6">PDF Solver / Summarizer</h2>
+            <form id="pdf-form" class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+                <input type="file" id="pdf-file" accept=".pdf" class="mb-4" required>
+                <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded">Process PDF</button>
+            </form>
+            <div id="pdf-output" class="mt-6 hidden">
+                <div id="pdf-content" class="bg-gray-100 dark:bg-gray-700 p-4 rounded"></div>
+                <button onclick="downloadPDF('pdf-content')" class="mt-4 bg-green-600 text-white px-4 py-2 rounded">Download Solved PDF</button>
+                <button onclick="showPaymentModal()" class="mt-4 bg-yellow-600 text-white px-4 py-2 rounded">Unlock All Solutions ₹19</button>
+            </div>
+            <div id="loading-pdf" class="loading mt-4"><div class="spinner border-4 border-blue-600 border-t-transparent rounded-full w-8 h-8 animate-spin mx-auto"></div></div>
+        </section>
+
+        <!-- Contact Section -->
+        <section id="contact" class="section hidden">
+            <h2 class="text-3xl font-bold mb-6">Contact Us</h2>
+            <p>Email: support@eduai.pro</p>
+            <p>Phone: +91-1234567890</p>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 dark:bg-gray-900 text-white p-4 text-center">
+        <p>&copy; 2023 EduAI Pro. All rights reserved.</p>
+        <div class="mt-2">
+            <a href="#" class="mx-2 hover:underline">Privacy Policy</a>
+            <a href="#" class="mx-2 hover:underline">About</a>
+            <a href="#" class="mx-2 hover:underline">Contact</a>
+        </div>
+    </footer>
+
+    <!-- Payment Modal -->
+    <div id="payment-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center">
+        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md w-96">
+            <h3 class="text-xl font-bold mb-4">Payment</h3>
+            <input type="text" placeholder="Name" class="p-2 border rounded mb-2 w-full dark:bg-gray-700">
+            <input type="tel" placeholder="Phone" class="p-2 border rounded mb-2 w-full dark:bg-gray-700">
+            <input type="text" placeholder="UPI ID" class="p-2 border rounded mb-4 w-full dark:bg-gray-700">
+            <button onclick="processPayment()" class="bg-blue-600 text-white px-4 py-2 rounded w-full">Pay Now</button>
+            <button onclick="closeModal()" class="mt-2 text-gray-600 w-full">Cancel</button>
+        </div>
+    </div>
+
+    <script>
+        // Theme Toggle
+        function toggleTheme() {
+            document.body.classList.toggle('dark');
+            document.body.classList.toggle('light');
+            document.getElementById('theme-toggle').textContent = document.body.classList.contains('dark') ? '🌙' : '☀️';
+        }
+
+        // Section Navigation
+        function showSection(sectionId) {
+            document.querySelectorAll('.section').forEach(sec => sec.classList.add('hidden'));
+            document.getElementById(sectionId).classList.remove('hidden');
+        }
+
+        // Payment Modal
+        function showPaymentModal() {
+            document.getElementById('payment-modal').classList.remove('hidden');
+        }
+        function closeModal() {
+            document.getElementById('payment-modal').classList.add('hidden');
+        }
+        function processPayment() {
+            alert('Payment Successful! (Dummy)');
+            closeModal();
+        }
+
+        // OpenAI API Call
+        async function callOpenAI(prompt) {
+            const response = await fetch('https://api.openai.com/v1/completions', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer sk-placeholder'  // Replace with real key
+                },
+                body: JSON.stringify({
+                    model: 'text-davinci-003',
+                    prompt: prompt,
+                    max_tokens: 1000
+                })
+            });
+            const data = await response.json();
+            return data.choices[0].text.trim();
+        }
+
+        // Notes Generator
+        document.getElementById('notes-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const subject = document.getElementById('subject').value;
+            const chapter = document.getElementById('chapter').value;
+            const topic = document.getElementById('topic').value;
+            const type = document.getElementById('note-type').value;
+            const prompt = `Generate ${type} for ${subject}, Chapter: ${chapter}, Topic: ${topic}.`;
+            document.getElementById('loading-notes').classList.add('show');
+            const result = await callOpenAI(prompt);
+            document.getElementById('loading-notes').classList.remove('show');
+            document.getElementById('notes-content').innerHTML = `<pre>${result}</pre>`;
+            document.getElementById('notes-output').classList.remove('hidden');
+        });
+
+        // PDF Solver
+        document.getElementById('pdf-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const file = document.getElementById('pdf-file').files[0];
+            if (!file) return;
+            document.getElementById('loading-pdf').classList.add('show');
+            const text = await extractTextFromPDF(file);
+            const prompt = `Summarize the following PDF text, extract important points, MCQs, and short answers: ${text}`;
+            const result = await callOpenAI(prompt);
+            document.getElementById('loading-pdf').classList.remove('show');
+            document.getElementById('pdf-content').innerHTML = `<pre>${result}</pre>`;
+            document.getElementById('pdf-output').classList.remove('hidden');
+        });
+
+        // PDF Text Extraction
+        async function extractTextFromPDF(file) {
+            const arrayBuffer = await file.arrayBuffer();
+            const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+            let text = '';
+            for (let i = 1; i <= pdf.numPages; i++) {
+                const page = await pdf.getPage(i);
+                const content = await page.getTextContent();
+                text += content.items.map(item => item.str).join(' ') + '\n';
+            }
+            return text;
+        }
+
+        // Download PDF
+        function downloadPDF(contentId) {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            const content = document.getElementById(contentId).textContent;
+            doc.text(content, 10, 10);
+            doc.save('output.pdf');
+        }
+
+        // Initialize
+        showSection('home');
+    </script>
+</body>
+</html>
